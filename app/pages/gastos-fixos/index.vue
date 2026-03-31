@@ -15,14 +15,12 @@
 
     <!-- Charts (only show when there are expenses) -->
     <section v-if="expenses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <MockChart
+      <DonutChart
         title="Gastos por Categoria"
-        type="donut"
         :data="categoryData"
       />
-      <MockChart
+      <BarChart
         title="Resumo por Status"
-        type="bar"
         :data="statusData"
       />
     </section>
@@ -52,8 +50,8 @@
           :due-day="expense.dueDay ? `dia ${String(expense.dueDay).padStart(2, '0')}` : ''"
           :status="expense.status"
           :editable="true"
-          @delete="removeExpense(expense.id)"
-          @update-value="(val) => updateExpense(expense.id, { value: val })"
+          @delete="handleDelete(expense)"
+          @update-value="(val) => handleUpdateValue(expense, val)"
         />
       </div>
 
@@ -93,6 +91,7 @@
 </template>
 
 <script setup>
+const toast = useToast()
 const { expenses, removeExpense, updateExpense, total, paidTotal, pendingTotal } = useExpenses()
 
 const selectedCategory = ref('')
@@ -121,8 +120,29 @@ const categoryData = computed(() => {
 
 const statusData = computed(() => {
   return [
-    { label: 'Pagos', value: paidTotal.value, color: 'bg-green-500' },
-    { label: 'Pendentes', value: pendingTotal.value, color: 'bg-amber-500' },
+    { label: 'Pagos', value: paidTotal.value, color: '#22c55e' },
+    { label: 'Pendentes', value: pendingTotal.value, color: '#f59e0b' },
   ]
 })
+
+function handleDelete(expense) {
+  removeExpense(expense.id)
+  toast.add({
+    title: 'Gasto removido',
+    description: `"${expense.name}" foi removido com sucesso.`,
+    icon: 'i-heroicons-trash',
+    color: 'error',
+  })
+}
+
+function handleUpdateValue(expense, newValue) {
+  const formatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newValue)
+  updateExpense(expense.id, { value: newValue })
+  toast.add({
+    title: 'Valor atualizado',
+    description: `"${expense.name}" atualizado para ${formatted}.`,
+    icon: 'i-heroicons-pencil-square',
+    color: 'success',
+  })
+}
 </script>

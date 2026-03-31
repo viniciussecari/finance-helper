@@ -37,15 +37,13 @@
 
     <!-- Charts Section (only show with data) -->
     <section v-if="expenses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <MockChart
+      <DonutChart
         title="Gastos por Categoria"
         subtitle="Mês atual"
-        type="donut"
         :data="categoryExpenses"
       />
-      <MockChart
+      <BarChart
         title="Resumo"
-        type="bar"
         :data="summaryData"
       />
     </section>
@@ -162,9 +160,9 @@ const categoryExpenses = computed(() => {
 
 const summaryData = computed(() => {
   return [
-    { label: 'Renda', value: monthlyIncome.value, color: 'bg-green-500' },
-    { label: 'Gastos', value: total.value, color: 'bg-red-500' },
-    { label: 'Saldo', value: Math.max(saldoLivre.value, 0), color: 'bg-indigo-500' },
+    { label: 'Renda', value: monthlyIncome.value, color: '#22c55e' },
+    { label: 'Gastos', value: total.value, color: '#ef4444' },
+    { label: 'Saldo', value: Math.max(saldoLivre.value, 0), color: '#6366f1' },
   ]
 })
 

@@ -162,6 +162,7 @@
 
 <script setup>
 const router = useRouter()
+const toast = useToast()
 
 const monthlyIncome = useMonthlyIncome()
 const { addExpense, total: expensesTotal } = useExpenses()
@@ -216,7 +217,15 @@ function formatCurrency(value) {
 }
 
 function handleSave() {
-  if (!form.name || !form.value) return
+  if (!form.name || !form.value) {
+    toast.add({
+      title: 'Campos obrigatórios',
+      description: 'Preencha o nome e o valor do gasto.',
+      icon: 'i-heroicons-exclamation-triangle',
+      color: 'warning',
+    })
+    return
+  }
 
   addExpense({
     name: form.name,
@@ -226,6 +235,13 @@ function handleSave() {
     status: form.status,
     notes: form.notes,
     recurring: form.recurring,
+  })
+
+  toast.add({
+    title: 'Gasto adicionado',
+    description: `"${form.name}" foi salvo com sucesso.`,
+    icon: 'i-heroicons-check-circle',
+    color: 'success',
   })
 
   router.push('/gastos-fixos')

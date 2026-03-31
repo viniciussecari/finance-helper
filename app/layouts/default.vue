@@ -95,7 +95,24 @@
 
 <script setup>
 const route = useRoute()
+const toast = useToast()
 const monthlyIncome = useMonthlyIncome()
+
+let incomeDebounce = null
+watch(monthlyIncome, (val) => {
+  if (incomeDebounce) clearTimeout(incomeDebounce)
+  incomeDebounce = setTimeout(() => {
+    if (val > 0) {
+      const formatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
+      toast.add({
+        title: 'Renda atualizada',
+        description: `Valor mensal salvo: ${formatted}`,
+        icon: 'i-heroicons-check-circle',
+        color: 'success',
+      })
+    }
+  }, 800)
+})
 
 const menuItems = [
   { path: '/', label: 'Dashboard', mobileLabel: 'Home', icon: 'i-heroicons-home' },
