@@ -1,10 +1,9 @@
 <template>
   <div>
-    <NuxtRouteAnnouncer />
-
-    <HeaderMenu />
-
-    <NuxtPage class="px-10 py-6" />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+    <UToaster />
   </div>
 </template>
 
