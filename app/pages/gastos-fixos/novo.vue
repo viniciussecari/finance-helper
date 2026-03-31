@@ -164,8 +164,10 @@
 const router = useRouter()
 
 const monthlyIncome = useMonthlyIncome()
+const { addExpense, total: expensesTotal } = useExpenses()
+
 const income = computed(() => monthlyIncome.value || 0)
-const currentExpenses = 3147
+const currentExpenses = computed(() => expensesTotal.value)
 
 const form = reactive({
   name: '',
@@ -194,11 +196,11 @@ const statusOptions = [
 ]
 
 const newBalance = computed(() => {
-  return income.value - currentExpenses - (form.value || 0)
+  return income.value - currentExpenses.value - (form.value || 0)
 })
 
 const commitPercent = computed(() => {
-  const total = currentExpenses + (form.value || 0)
+  const total = currentExpenses.value + (form.value || 0)
   if (!income.value) return 0
   return Math.round((total / income.value) * 100)
 })
@@ -214,7 +216,18 @@ function formatCurrency(value) {
 }
 
 function handleSave() {
-  // Mock save - just navigate back
+  if (!form.name || !form.value) return
+
+  addExpense({
+    name: form.name,
+    value: form.value,
+    category: form.category || 'Outros',
+    dueDay: form.dueDay,
+    status: form.status,
+    notes: form.notes,
+    recurring: form.recurring,
+  })
+
   router.push('/gastos-fixos')
 }
 </script>

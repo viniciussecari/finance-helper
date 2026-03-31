@@ -14,14 +14,37 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">{{ category }} &middot; Vence {{ dueDay }}</p>
     </div>
 
-    <div class="text-right flex-shrink-0">
-      <p class="text-sm font-bold text-gray-900 dark:text-white">{{ formattedValue }}</p>
-      <span
-        class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-        :class="statusClasses"
-      >
-        {{ statusLabel }}
-      </span>
+    <!-- Inline edit mode -->
+    <div v-if="editing" class="flex items-center gap-2">
+      <input
+        ref="editInput"
+        v-model.number="editValue"
+        type="number"
+        min="0"
+        step="10"
+        class="w-24 text-sm font-bold text-right bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        @keyup.enter="confirmEdit"
+        @keyup.escape="cancelEdit"
+      />
+      <UButton size="xs" icon="i-heroicons-check" color="primary" variant="soft" @click="confirmEdit" />
+      <UButton size="xs" icon="i-heroicons-x-mark" color="neutral" variant="ghost" @click="cancelEdit" />
+    </div>
+
+    <!-- Normal display -->
+    <div v-else class="text-right flex-shrink-0 flex items-center gap-2">
+      <div>
+        <p class="text-sm font-bold text-gray-900 dark:text-white">{{ formattedValue }}</p>
+        <span
+          class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+          :class="statusClasses"
+        >
+          {{ statusLabel }}
+        </span>
+      </div>
+      <div v-if="editable" class="flex items-center gap-1 ml-2">
+        <UButton size="xs" icon="i-heroicons-pencil-square" color="neutral" variant="ghost" @click="startEdit" />
+        <UButton size="xs" icon="i-heroicons-trash" color="red" variant="ghost" @click="$emit('delete')" />
+      </div>
     </div>
   </div>
 </template>
@@ -33,7 +56,34 @@ const props = defineProps({
   category: { type: String, default: 'Outros' },
   dueDay: { type: String, default: '' },
   status: { type: String, default: 'pending' },
+  editable: { type: Boolean, default: false },
 })
+
+const emit = defineEmits(['delete', 'update-value'])
+
+const editing = ref(false)
+const editValue = ref(0)
+const editInput = ref(null)
+
+function startEdit() {
+  editValue.value = props.value
+  editing.value = true
+  nextTick(() => {
+    editInput.value?.focus()
+    editInput.value?.select()
+  })
+}
+
+function confirmEdit() {
+  if (editValue.value >= 0) {
+    emit('update-value', editValue.value)
+  }
+  editing.value = false
+}
+
+function cancelEdit() {
+  editing.value = false
+}
 
 const categoryConfigs = {
   Moradia: { icon: 'i-heroicons-home', bg: 'bg-blue-100 dark:bg-blue-900', color: 'text-blue-600 dark:text-blue-400' },

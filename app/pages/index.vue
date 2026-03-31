@@ -8,16 +8,14 @@
           :value="monthlyIncome"
           icon="i-heroicons-arrow-trending-up"
           color="green"
-          :trend="3.2"
           description="Editável no topo da página"
         />
         <MetricCard
           label="Gastos Fixos"
-          :value="totalExpenses"
+          :value="total"
           icon="i-heroicons-banknotes"
           color="red"
-          :trend="-1.5"
-          description="vs. mês anterior"
+          :description="`${expenses.length} gastos cadastrados`"
         />
         <MetricCard
           label="Saldo Livre"
@@ -37,19 +35,18 @@
       </div>
     </section>
 
-    <!-- Charts Section -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <MockChart
-        title="Gastos por Mês"
-        subtitle="Últimos 6 meses"
-        type="bar"
-        :data="monthlyExpenses"
-      />
+    <!-- Charts Section (only show with data) -->
+    <section v-if="expenses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <MockChart
         title="Gastos por Categoria"
         subtitle="Mês atual"
         type="donut"
         :data="categoryExpenses"
+      />
+      <MockChart
+        title="Resumo"
+        type="bar"
+        :data="summaryData"
       />
     </section>
 
@@ -58,37 +55,56 @@
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Dicas e Alertas</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InsightCard
-          title="Gasto acima da média"
-          description="Seus gastos com Assinaturas aumentaram 15% neste mês. Considere revisar serviços que não usa."
+          v-if="monthlyIncome === 0"
+          title="Configure sua renda"
+          description="Insira seu valor total mensal no campo no topo da página para ver seus cálculos financeiros."
+          icon="i-heroicons-information-circle"
+          type="info"
+        />
+        <InsightCard
+          v-if="expenses.length === 0"
+          title="Adicione seus gastos"
+          description="Vá para a seção de Gastos Fixos e cadastre suas contas mensais para acompanhar suas finanças."
+          icon="i-heroicons-plus-circle"
+          type="info"
+          action-label="Ir para Gastos Fixos"
+          @action="navigateTo('/gastos-fixos/novo')"
+        />
+        <InsightCard
+          v-if="comprometido > 80"
+          title="Renda muito comprometida"
+          description="Mais de 80% da sua renda está comprometida com gastos fixos. Revise seus gastos."
           icon="i-heroicons-exclamation-triangle"
           type="warning"
-          action-label="Ver detalhes"
         />
         <InsightCard
-          title="Boa notícia!"
-          description="Você economizou R$ 200 em Alimentação comparado ao mês passado. Continue assim!"
-          icon="i-heroicons-check-circle"
-          type="success"
+          v-if="saldoLivre < 0"
+          title="Saldo negativo!"
+          description="Seus gastos fixos excedem sua renda mensal. Corte gastos ou aumente sua renda."
+          icon="i-heroicons-x-circle"
+          type="warning"
         />
         <InsightCard
-          title="Conta próxima do vencimento"
-          description="Sua conta de Energia vence em 3 dias. Valor: R$ 180,00."
+          v-if="pendingTotal > 0"
+          title="Contas pendentes"
+          :description="`Você tem ${formatCurrency(pendingTotal)} em contas pendentes de pagamento.`"
           icon="i-heroicons-clock"
           type="info"
-          action-label="Marcar como paga"
+          action-label="Ver gastos"
+          @action="navigateTo('/gastos-fixos')"
         />
         <InsightCard
-          title="Cashback disponível"
-          description="Você tem R$ 45,00 de cashback acumulado no cartão. Resgate antes do final do mês."
-          icon="i-heroicons-gift"
-          type="promo"
-          action-label="Ver cashback"
+          v-if="comprometido > 0 && comprometido <= 60"
+          title="Boa saúde financeira"
+          description="Menos de 60% da sua renda está comprometida. Continue administrando bem!"
+          icon="i-heroicons-check-circle"
+          type="success"
         />
       </div>
     </section>
 
     <!-- Recent Expenses -->
-    <section>
+    <section v-if="expenses.length > 0">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Últimos Gastos</h2>
         <NuxtLink to="/gastos-fixos" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
@@ -98,52 +114,61 @@
       <div class="space-y-3">
         <ExpenseListItem
           v-for="expense in recentExpenses"
-          :key="expense.name"
+          :key="expense.id"
           :name="expense.name"
           :value="expense.value"
           :category="expense.category"
-          :due-day="expense.dueDay"
+          :due-day="expense.dueDay ? `dia ${String(expense.dueDay).padStart(2, '0')}` : ''"
           :status="expense.status"
         />
       </div>
+    </section>
+
+    <!-- Empty state -->
+    <section v-if="expenses.length === 0" class="text-center py-12">
+      <UIcon name="i-heroicons-chart-bar" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Comece a organizar suas finanças</h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Configure sua renda mensal no topo e adicione seus gastos fixos.
+      </p>
+      <NuxtLink to="/gastos-fixos/novo" class="mt-4 inline-block">
+        <UButton label="Adicionar Primeiro Gasto" icon="i-heroicons-plus" color="primary" />
+      </NuxtLink>
     </section>
   </div>
 </template>
 
 <script setup>
 const monthlyIncome = useMonthlyIncome()
+const { expenses, total, paidTotal, pendingTotal } = useExpenses()
 
-const totalExpenses = 3150
-
-const saldoLivre = computed(() => monthlyIncome.value - totalExpenses)
+const saldoLivre = computed(() => monthlyIncome.value - total.value)
 const comprometido = computed(() => {
   if (!monthlyIncome.value) return 0
-  return Math.round((totalExpenses / monthlyIncome.value) * 1000) / 10
+  return Math.round((total.value / monthlyIncome.value) * 1000) / 10
 })
 
-const monthlyExpenses = [
-  { label: 'Out', value: 2800, color: 'bg-indigo-400' },
-  { label: 'Nov', value: 3100, color: 'bg-indigo-400' },
-  { label: 'Dez', value: 3400, color: 'bg-indigo-400' },
-  { label: 'Jan', value: 3000, color: 'bg-indigo-400' },
-  { label: 'Fev', value: 2950, color: 'bg-indigo-400' },
-  { label: 'Mar', value: 3150, color: 'bg-indigo-500' },
-]
+const recentExpenses = computed(() => {
+  return expenses.value.slice(-5).reverse()
+})
 
-const categoryExpenses = [
-  { label: 'Moradia', value: 1200 },
-  { label: 'Transporte', value: 600 },
-  { label: 'Alimentação', value: 500 },
-  { label: 'Assinaturas', value: 350 },
-  { label: 'Saúde', value: 300 },
-  { label: 'Outros', value: 200 },
-]
+const categoryExpenses = computed(() => {
+  const map = {}
+  expenses.value.forEach((e) => {
+    map[e.category] = (map[e.category] || 0) + e.value
+  })
+  return Object.entries(map).map(([label, value]) => ({ label, value }))
+})
 
-const recentExpenses = [
-  { name: 'Aluguel', value: 1200, category: 'Moradia', dueDay: 'dia 05', status: 'paid' },
-  { name: 'Plano de Saúde', value: 300, category: 'Saúde', dueDay: 'dia 10', status: 'paid' },
-  { name: 'Energia', value: 180, category: 'Moradia', dueDay: 'dia 15', status: 'pending' },
-  { name: 'Internet', value: 120, category: 'Assinaturas', dueDay: 'dia 20', status: 'pending' },
-  { name: 'Gasolina', value: 350, category: 'Transporte', dueDay: 'dia 25', status: 'pending' },
-]
+const summaryData = computed(() => {
+  return [
+    { label: 'Renda', value: monthlyIncome.value, color: 'bg-green-500' },
+    { label: 'Gastos', value: total.value, color: 'bg-red-500' },
+    { label: 'Saldo', value: Math.max(saldoLivre.value, 0), color: 'bg-indigo-500' },
+  ]
+})
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
 </script>
