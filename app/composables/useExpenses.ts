@@ -15,9 +15,9 @@ function generateId(): string {
 
 export function useExpenses() {
   const expenses = useState<Expense[]>('expenses', () => [])
+  const loaded = useState<boolean>('expenses-loaded', () => false)
 
-  // Load from localStorage on client
-  if (import.meta.client) {
+  if (import.meta.client && !loaded.value) {
     const saved = localStorage.getItem('finance-helper-expenses')
     if (saved) {
       try {
@@ -26,8 +26,8 @@ export function useExpenses() {
         // ignore invalid JSON
       }
     }
+    loaded.value = true
 
-    // Watch and persist
     watch(expenses, (val) => {
       localStorage.setItem('finance-helper-expenses', JSON.stringify(val))
     }, { deep: true })
@@ -55,6 +55,7 @@ export function useExpenses() {
 
   return {
     expenses,
+    loaded,
     addExpense,
     removeExpense,
     updateExpense,

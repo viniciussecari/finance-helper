@@ -1,6 +1,14 @@
 <template>
+  <!-- Loading Overlay -->
+  <div v-if="!dataReady" class="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+    <div class="text-center">
+      <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto" />
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Carregando seus dados...</p>
+    </div>
+  </div>
+
   <!-- Desktop Sidebar -->
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-950">
     <aside
       class="hidden md:flex fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col z-30"
     >
@@ -97,6 +105,14 @@
 const route = useRoute()
 const toast = useToast()
 const monthlyIncome = useMonthlyIncome()
+const { loaded: expensesLoaded } = useExpenses()
+const incomeLoaded = useState('monthly-income-loaded')
+
+const dataReady = computed(() => {
+  // On server, show loading; on client, wait for localStorage reads
+  if (!import.meta.client) return false
+  return expensesLoaded.value && incomeLoaded.value
+})
 
 let incomeDebounce = null
 watch(monthlyIncome, (val) => {
