@@ -163,7 +163,8 @@
 <script setup>
 const router = useRouter()
 
-const income = 5200
+const monthlyIncome = useMonthlyIncome()
+const income = computed(() => monthlyIncome.value || 0)
 const currentExpenses = 3147
 
 const form = reactive({
@@ -193,12 +194,13 @@ const statusOptions = [
 ]
 
 const newBalance = computed(() => {
-  return income - currentExpenses - (form.value || 0)
+  return income.value - currentExpenses - (form.value || 0)
 })
 
 const commitPercent = computed(() => {
   const total = currentExpenses + (form.value || 0)
-  return Math.round((total / income) * 100)
+  if (!income.value) return 0
+  return Math.round((total / income.value) * 100)
 })
 
 const commitColor = computed(() => {

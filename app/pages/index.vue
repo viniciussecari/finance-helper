@@ -5,15 +5,15 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           label="Renda Mensal"
-          :value="5200"
+          :value="monthlyIncome"
           icon="i-heroicons-arrow-trending-up"
           color="green"
           :trend="3.2"
-          description="vs. mês anterior"
+          description="Editável no topo da página"
         />
         <MetricCard
           label="Gastos Fixos"
-          :value="3150"
+          :value="totalExpenses"
           icon="i-heroicons-banknotes"
           color="red"
           :trend="-1.5"
@@ -21,14 +21,14 @@
         />
         <MetricCard
           label="Saldo Livre"
-          :value="2050"
+          :value="saldoLivre"
           icon="i-heroicons-wallet"
           color="indigo"
           description="Disponível para usar"
         />
         <MetricCard
           label="Comprometido"
-          :value="60.6"
+          :value="comprometido"
           icon="i-heroicons-chart-pie"
           color="amber"
           format="percent"
@@ -111,6 +111,16 @@
 </template>
 
 <script setup>
+const monthlyIncome = useMonthlyIncome()
+
+const totalExpenses = 3150
+
+const saldoLivre = computed(() => monthlyIncome.value - totalExpenses)
+const comprometido = computed(() => {
+  if (!monthlyIncome.value) return 0
+  return Math.round((totalExpenses / monthlyIncome.value) * 1000) / 10
+})
+
 const monthlyExpenses = [
   { label: 'Out', value: 2800, color: 'bg-indigo-400' },
   { label: 'Nov', value: 3100, color: 'bg-indigo-400' },

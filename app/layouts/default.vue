@@ -42,9 +42,22 @@
     <!-- Main Content -->
     <main class="md:ml-64 min-h-screen pb-24 md:pb-0">
       <header class="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-6 py-4 md:px-8">
-        <div class="flex items-center justify-between">
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ pageTitle }}</h1>
+        <div class="flex items-center justify-between gap-4">
+          <h1 class="text-xl font-bold text-gray-900 dark:text-white shrink-0">{{ pageTitle }}</h1>
           <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-1.5">
+              <UIcon name="i-heroicons-currency-dollar" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
+              <label for="monthly-income" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:inline">Valor Total Mensal</label>
+              <input
+                id="monthly-income"
+                v-model.number="monthlyIncome"
+                type="number"
+                min="0"
+                step="100"
+                placeholder="0,00"
+                class="w-28 bg-transparent border-none text-sm font-semibold text-gray-900 dark:text-white focus:outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
             <UButton variant="ghost" icon="i-heroicons-bell" color="neutral" />
             <UButton variant="ghost" icon="i-heroicons-cog-6-tooth" color="neutral" />
           </div>
@@ -82,6 +95,7 @@
 
 <script setup>
 const route = useRoute()
+const monthlyIncome = useMonthlyIncome()
 
 const menuItems = [
   { path: '/', label: 'Dashboard', mobileLabel: 'Home', icon: 'i-heroicons-home' },
