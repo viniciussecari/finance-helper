@@ -1,5 +1,17 @@
 <template>
   <div class="space-y-8">
+    <!-- Greeting Section -->
+    <section>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-semibold text-gray-900 dark:text-white">Olá,</span>
+        <input 
+          v-model="userName" 
+          placeholder="convidado" 
+          class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 bg-transparent focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 rounded-lg px-2 -ml-2 transition-colors w-full sm:w-auto"
+        />
+      </div>
+    </section>
+
     <!-- Metric Cards -->
     <section>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
