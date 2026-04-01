@@ -188,6 +188,7 @@ const categoryOptions = [
   'Educação',
   'Lazer',
   'Assinaturas',
+  'Cofrinho',
   'Outros',
 ]
 

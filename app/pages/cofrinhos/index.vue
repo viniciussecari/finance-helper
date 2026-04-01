@@ -35,6 +35,14 @@
       />
     </section>
 
+    <section v-if="piggyBanks.length > 0">
+      <DonutChart
+        title="Renda para Cofrinhos"
+        subtitle="Mês atual"
+        :data="piggyBankDonutData"
+      />
+    </section>
+
     <!-- PiggyBank List -->
     <section>
       <div class="space-y-3">
@@ -74,9 +82,23 @@
 
 <script setup>
 import { useCofrinhos } from '~/composables/useCofrinhos'
+import { useExpenses } from '~/composables/useExpenses'
+import { useMonthlyIncome } from '~/composables/useMonthlyIncome'
 
 const toast = useToast()
 const { piggyBanks, totalGoal, totalSaved, totalRemaining, removePiggyBank } = useCofrinhos()
+const { expenses } = useExpenses()
+const monthlyIncome = useMonthlyIncome()
+
+const piggyBankDonutData = computed(() => {
+  const piggyBankExpenses = expenses.value.filter(e => e.category === 'Cofrinho').reduce((acc, e) => acc + e.value, 0);
+  const remainingIncome = monthlyIncome.value - piggyBankExpenses;
+
+  return [
+    { label: 'Cofrinhos', value: piggyBankExpenses, color: '#3b82f6' },
+    { label: 'Restante', value: remainingIncome, color: '#6b7280' },
+  ];
+});
 
 function handleDelete(piggyBank) {
   removePiggyBank(piggyBank.id)

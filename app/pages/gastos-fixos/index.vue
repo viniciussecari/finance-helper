@@ -50,8 +50,10 @@
           :due-day="expense.dueDay ? `dia ${String(expense.dueDay).padStart(2, '0')}` : ''"
           :status="expense.status"
           :editable="true"
+          :status-options="statusOptions"
           @delete="handleDelete(expense)"
           @update-value="(val) => handleUpdateValue(expense, val)"
+          @update-status="(status) => handleUpdateStatus(expense, status)"
         />
       </div>
 
@@ -125,6 +127,11 @@ const statusData = computed(() => {
   ]
 })
 
+const statusOptions = [
+  { label: 'Pendente', value: 'pending' },
+  { label: 'Pago', value: 'paid' },
+]
+
 function handleDelete(expense) {
   removeExpense(expense.id)
   toast.add({
@@ -142,6 +149,16 @@ function handleUpdateValue(expense, newValue) {
     title: 'Valor atualizado',
     description: `"${expense.name}" atualizado para ${formatted}.`,
     icon: 'i-heroicons-pencil-square',
+    color: 'success',
+  })
+}
+
+function handleUpdateStatus(expense, newStatus) {
+  updateExpense(expense.id, { status: newStatus })
+  toast.add({
+    title: 'Status atualizado',
+    description: `Status de "${expense.name}" atualizado para ${newStatus === 'paid' ? 'Pago' : 'Pendente'}.`,
+    icon: 'i-heroicons-check-circle',
     color: 'success',
   })
 }

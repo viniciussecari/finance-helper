@@ -47,6 +47,20 @@
       </div>
     </section>
 
+    <!-- Charts Section (only show with data) -->
+    <section v-if="expenses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <DonutChart
+      title="Gastos por Categoria"
+      subtitle="Mês atual"
+      :data="categoryExpenses"
+      />
+      <DonutChart
+        title="Renda para Cofrinhos"
+        subtitle="Mês atual"
+        :data="piggyBankDonutData"
+      />
+    </section>
+
     <!-- Cofrinhos Section -->
     <section v-if="piggyBanks.length > 0">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Meus Cofrinhos</h2>
@@ -78,18 +92,18 @@
         />
       </div>
     </section>
-
-    <!-- Charts Section (only show with data) -->
-    <section v-if="expenses.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <DonutChart
-        title="Gastos por Categoria"
-        subtitle="Mês atual"
-        :data="categoryExpenses"
-      />
-      <BarChart
-        title="Resumo"
-        :data="summaryData"
-      />
+    
+    <section v-if="piggyBanks.length === 0" class="text-center py-12">
+      <UIcon name="i-heroicons-archive-box" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Comece a organizar suas finanças</h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Organize cofrinhos e suas metas.
+      </p>
+      <div class="mt-6 flex justify-center items-center gap-4">
+        <NuxtLink to="/cofrinhos/novo">
+          <UButton label="Criar Cofrinho" icon="i-heroicons-archive-box" color="primary" variant="outline" />
+        </NuxtLink>
+      </div>
     </section>
 
     <!-- Insights -->
@@ -167,7 +181,7 @@
     </section>
 
     <!-- Empty state -->
-    <section v-if="expenses.length === 0 && piggyBanks.length === 0" class="text-center py-12">
+    <section v-if="expenses.length === 0" class="text-center py-12">
       <UIcon name="i-heroicons-chart-bar" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Comece a organizar suas finanças</h3>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -176,9 +190,6 @@
       <div class="mt-6 flex justify-center items-center gap-4">
         <NuxtLink to="/gastos-fixos/novo">
           <UButton label="Adicionar Gasto" icon="i-heroicons-plus" color="primary" />
-        </NuxtLink>
-        <NuxtLink to="/cofrinhos/novo">
-          <UButton label="Criar Cofrinho" icon="i-heroicons-archive-box" color="primary" variant="outline" />
         </NuxtLink>
       </div>
     </section>
@@ -220,6 +231,16 @@ const summaryData = computed(() => {
     { label: 'Saldo', value: Math.max(saldoLivre.value, 0), color: '#6366f1' },
   ]
 })
+
+const piggyBankDonutData = computed(() => {
+  const piggyBankExpenses = expenses.value.filter(e => e.category === 'Cofrinho').reduce((acc, e) => acc + e.value, 0);
+  const remainingIncome = monthlyIncome.value - piggyBankExpenses;
+
+  return [
+    { label: 'Cofrinhos', value: piggyBankExpenses, color: '#3b82f6' },
+    { label: 'Restante', value: remainingIncome, color: '#6b7280' },
+  ];
+});
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)

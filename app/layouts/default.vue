@@ -10,7 +10,7 @@
   <!-- Desktop Sidebar -->
   <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-950">
     <aside
-      class="hidden md:flex fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col z-30"
+      class="hidden md:flex fixed top-0 left-0 h-full w-[20dvw] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col z-30"
     >
       <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-200 dark:border-gray-800">
         <img class="h-10" src="~/assets/images/logo.png" alt="Finance Helper Logo" />
@@ -50,7 +50,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="md:ml-64 min-h-screen pb-24 md:pb-0">
+    <main class="w-full md:w-[80dvw] md:ml-64 min-h-screen pb-24 md:pb-0">
       <header class="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-6 py-4 md:px-8">
         <div class="flex items-center justify-between gap-4">
           <h1 class="text-xl font-bold text-gray-900 dark:text-white shrink-0">{{ pageTitle }}</h1>
@@ -74,7 +74,7 @@
         </div>
       </header>
 
-      <div class="px-4 py-6 md:px-8">
+      <div class=" px-4 py-6 md:px-8">
         <slot />
       </div>
     </main>

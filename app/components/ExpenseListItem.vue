@@ -14,7 +14,6 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">{{ category }} &middot; Vence {{ dueDay }}</p>
     </div>
 
-    <!-- Inline edit mode -->
     <div v-if="editing" class="flex items-center gap-2">
       <input
         ref="editInput"
@@ -26,20 +25,29 @@
         @keyup.enter="confirmEdit"
         @keyup.escape="cancelEdit"
       />
+
+      <USelectMenu
+        v-model="editStatus"
+        :items="statusOptionsList" 
+        option-attribute="label"
+        placeholder="Status..."
+        class="w-32"
+        :popper="{ placement: 'top', strategy: 'absolute' }"
+      />
+
       <UButton size="xs" icon="i-heroicons-check" color="primary" variant="soft" @click="confirmEdit" />
       <UButton size="xs" icon="i-heroicons-x-mark" color="neutral" variant="ghost" @click="cancelEdit" />
     </div>
 
-    <!-- Normal display -->
     <div v-else class="text-right flex-shrink-0 flex items-center gap-2">
       <div>
         <p class="text-sm font-bold text-gray-900 dark:text-white">{{ formattedValue }}</p>
-        <span
-          class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
-          :class="statusClasses"
-        >
-          {{ statusLabel }}
-        </span>
+          <span
+            class="text-[10px] font-medium px-1.5 py-0.5 rounded-full cursor-pointer"
+            :class="statusClasses"
+          >
+            {{ statusLabel }}
+          </span>
       </div>
       <div v-if="editable" class="flex items-center gap-1 ml-2">
         <UButton size="xs" icon="i-heroicons-pencil-square" color="neutral" variant="ghost" @click="startEdit" />
@@ -50,6 +58,8 @@
 </template>
 
 <script setup>
+import { ref, computed, nextTick } from 'vue'
+
 const props = defineProps({
   name: { type: String, required: true },
   value: { type: Number, required: true },
@@ -57,17 +67,32 @@ const props = defineProps({
   dueDay: { type: String, default: '' },
   status: { type: String, default: 'pending' },
   editable: { type: Boolean, default: false },
+  statusOptions: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['delete', 'update-value'])
+const emit = defineEmits(['delete', 'update-value', 'update-status'])
 
 const editing = ref(false)
 const editValue = ref(0)
+const editStatus = ref(null) // Agora vai armazenar o objeto inteiro temporariamente
 const editInput = ref(null)
+
+// Alterado a chave de 'value' para 'content' para evitar uso de nomes reservados
+const statusOptionsList = [
+  { label: 'Pago', content: 'paid' },
+  { label: 'Pendente', content: 'pending' }
+]
 
 function startEdit() {
   editValue.value = props.value
+  
+  // Procura o objeto completo na lista que corresponde ao status atual da prop
+  const currentStatusObj = statusOptionsList.find(opt => opt.content === props.status)
+  // Define o v-model com o objeto inteiro (fallback para pendente caso não encontre)
+  editStatus.value = currentStatusObj || statusOptionsList[1] 
+  
   editing.value = true
+  
   nextTick(() => {
     editInput.value?.focus()
     editInput.value?.select()
@@ -75,9 +100,15 @@ function startEdit() {
 }
 
 function confirmEdit() {
-  if (editValue.value >= 0) {
+  // Emite apenas se o valor for válido e DIFERENTE do original
+  if (editValue.value >= 0 && editValue.value !== props.value) {
     emit('update-value', editValue.value)
   }
+  
+  if (editStatus.value && editStatus.value.content !== props.status) {
+    emit('update-status', editStatus.value.content)
+  }
+  
   editing.value = false
 }
 
@@ -99,7 +130,6 @@ const categoryConfigs = {
 const statusConfig = {
   paid: { label: 'Pago', classes: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' },
   pending: { label: 'Pendente', classes: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' },
-  overdue: { label: 'Atrasado', classes: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' },
 }
 
 const catConfig = computed(() => categoryConfigs[props.category] || categoryConfigs.Outros)
