@@ -36,13 +36,15 @@
 
       <div class="px-3 py-4 border-t border-gray-200 dark:border-gray-800">
         <div class="flex items-center gap-3 px-3 py-2">
-          <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center flex-shrink-0">
             <UIcon name="i-heroicons-user" class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">Usuário</p>
-            <p class="text-xs text-gray-500 truncate">usuario@email.com</p>
-          </div>
+          <input
+            v-model="userName"
+            type="text"
+            placeholder="Seu nome"
+            class="flex-1 min-w-0 bg-transparent border-none text-sm font-medium text-gray-900 dark:text-white focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
+          />
         </div>
       </div>
     </aside>
@@ -55,7 +57,8 @@
           <div class="flex items-center gap-3">
             <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-1.5">
               <UIcon name="i-heroicons-currency-dollar" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
-              <label for="monthly-income" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:inline">Valor Total Mensal</label>
+              <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <label for="monthly-income" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap leading-none">Renda Mensal</label>
               <input
                 id="monthly-income"
                 v-model.number="monthlyIncome"
@@ -63,8 +66,9 @@
                 min="0"
                 step="100"
                 placeholder="0,00"
-                class="w-28 bg-transparent border-none text-sm font-semibold text-gray-900 dark:text-white focus:outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  class="w-24 bg-transparent border-none text-sm font-semibold text-gray-900 dark:text-white focus:outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
+              </div>
             </div>
             <UButton variant="ghost" icon="i-heroicons-bell" color="neutral" />
             <UButton variant="ghost" icon="i-heroicons-cog-6-tooth" color="neutral" />
@@ -105,6 +109,7 @@
 const route = useRoute()
 const toast = useToast()
 const monthlyIncome = useMonthlyIncome()
+const userName = useUserName()
 const { loaded: expensesLoaded } = useExpenses()
 const incomeLoaded = useState('monthly-income-loaded')
 
