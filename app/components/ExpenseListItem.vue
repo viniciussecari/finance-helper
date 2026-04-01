@@ -14,29 +14,33 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">{{ category }} &middot; Vence {{ dueDay }}</p>
     </div>
 
-    <div v-if="editing" class="flex items-center gap-2">
-      <input
-        ref="editInput"
-        v-model.number="editValue"
-        type="number"
-        min="0"
-        step="10"
-        class="w-24 text-sm font-bold text-right bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        @keyup.enter="confirmEdit"
-        @keyup.escape="cancelEdit"
-      />
+    <div v-if="editing" class="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+      <div class="flex items-center gap-2">
+        <input
+          ref="editInput"
+          v-model.number="editValue"
+          type="number"
+          min="0"
+          step="10"
+          class="w-24 text-sm font-bold text-right bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          @keyup.enter="confirmEdit"
+          @keyup.escape="cancelEdit"
+        />
 
-      <USelectMenu
-        v-model="editStatus"
-        :items="statusOptionsList" 
-        option-attribute="label"
-        placeholder="Status..."
-        class="w-32"
-        :popper="{ placement: 'top', strategy: 'absolute' }"
-      />
+        <USelectMenu
+          v-model="editStatus"
+          :items="statusOptionsList" 
+          option-attribute="label"
+          placeholder="Status..."
+          class="w-32"
+          :popper="{ placement: 'top', strategy: 'absolute' }"
+        />
+      </div>
 
-      <UButton size="xs" icon="i-heroicons-check" color="primary" variant="soft" @click="confirmEdit" />
-      <UButton size="xs" icon="i-heroicons-x-mark" color="neutral" variant="ghost" @click="cancelEdit" />
+      <div class="flex items-center gap-2">
+        <UButton size="xs" icon="i-heroicons-check" color="primary" variant="soft" @click="confirmEdit" />
+        <UButton size="xs" icon="i-heroicons-x-mark" color="neutral" variant="ghost" @click="cancelEdit" />
+      </div>
     </div>
 
     <div v-else class="text-right flex-shrink-0 flex items-center gap-2">
@@ -74,10 +78,9 @@ const emit = defineEmits(['delete', 'update-value', 'update-status'])
 
 const editing = ref(false)
 const editValue = ref(0)
-const editStatus = ref(null) // Agora vai armazenar o objeto inteiro temporariamente
+const editStatus = ref(null) 
 const editInput = ref(null)
 
-// Alterado a chave de 'value' para 'content' para evitar uso de nomes reservados
 const statusOptionsList = [
   { label: 'Pago', content: 'paid' },
   { label: 'Pendente', content: 'pending' }
@@ -86,9 +89,7 @@ const statusOptionsList = [
 function startEdit() {
   editValue.value = props.value
   
-  // Procura o objeto completo na lista que corresponde ao status atual da prop
   const currentStatusObj = statusOptionsList.find(opt => opt.content === props.status)
-  // Define o v-model com o objeto inteiro (fallback para pendente caso não encontre)
   editStatus.value = currentStatusObj || statusOptionsList[1] 
   
   editing.value = true
@@ -100,7 +101,6 @@ function startEdit() {
 }
 
 function confirmEdit() {
-  // Emite apenas se o valor for válido e DIFERENTE do original
   if (editValue.value >= 0 && editValue.value !== props.value) {
     emit('update-value', editValue.value)
   }
