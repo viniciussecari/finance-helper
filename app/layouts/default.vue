@@ -135,12 +135,15 @@ watch(monthlyIncome, (val) => {
 const menuItems = [
   { path: '/', label: 'Dashboard', mobileLabel: 'Home', icon: 'i-heroicons-home' },
   { path: '/gastos-fixos', label: 'Gastos Fixos', mobileLabel: 'Gastos', icon: 'i-heroicons-banknotes' },
+  { path: '/cofrinhos', label: 'Cofrinhos', mobileLabel: 'Cofrinhos', icon: 'i-heroicons-archive-box' },
 ]
 
 const pageTitles = {
   '/': 'Dashboard',
   '/gastos-fixos': 'Gastos Fixos',
   '/gastos-fixos/novo': 'Novo Gasto',
+  '/cofrinhos': 'Meus Cofrinhos',
+  '/cofrinhos/novo': 'Novo Cofrinho',
 }
 
 const pageTitle = computed(() => {

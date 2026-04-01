@@ -1,5 +1,17 @@
 <template>
   <div class="space-y-8">
+    <!-- Greeting Section -->
+    <section>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-semibold text-gray-900 dark:text-white">Olá,</span>
+        <input 
+          v-model="userName" 
+          placeholder="convidado" 
+          class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 bg-transparent focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 rounded-lg px-2 -ml-2 transition-colors w-full sm:w-auto"
+        />
+      </div>
+    </section>
+
     <!-- Metric Cards -->
     <section>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -31,6 +43,38 @@
           color="amber"
           format="percent"
           description="Da renda mensal"
+        />
+      </div>
+    </section>
+
+    <!-- Cofrinhos Section -->
+    <section v-if="piggyBanks.length > 0">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Meus Cofrinhos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div 
+          v-for="cofrinho in recentPiggyBanks" 
+          :key="cofrinho.id" 
+          class="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold">{{ cofrinho.name }}</span>
+            <span class="text-sm font-bold text-green-600 dark:text-green-400">{{ Math.round(calculateProgress(cofrinho.saved, cofrinho.goal)) }}%</span>
+          </div>
+          <CustomProgressBar :value="cofrinho.saved" :max="cofrinho.goal" />
+          <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <span>{{ formatCurrency(cofrinho.saved) }}</span>
+            <span>{{ formatCurrency(cofrinho.goal) }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-6">
+        <UButton 
+          label="Ver todos os cofrinhos" 
+          variant="ghost" 
+          color="primary"
+          icon="i-heroicons-arrow-right-circle"
+          trailing
+          @click="navigateTo('/cofrinhos')" 
         />
       </div>
     </section>
@@ -123,15 +167,20 @@
     </section>
 
     <!-- Empty state -->
-    <section v-if="expenses.length === 0" class="text-center py-12">
+    <section v-if="expenses.length === 0 && piggyBanks.length === 0" class="text-center py-12">
       <UIcon name="i-heroicons-chart-bar" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto" />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Comece a organizar suas finanças</h3>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Configure sua renda mensal no topo e adicione seus gastos fixos.
       </p>
-      <NuxtLink to="/gastos-fixos/novo" class="mt-4 inline-block">
-        <UButton label="Adicionar Primeiro Gasto" icon="i-heroicons-plus" color="primary" />
-      </NuxtLink>
+      <div class="mt-6 flex justify-center items-center gap-4">
+        <NuxtLink to="/gastos-fixos/novo">
+          <UButton label="Adicionar Gasto" icon="i-heroicons-plus" color="primary" />
+        </NuxtLink>
+        <NuxtLink to="/cofrinhos/novo">
+          <UButton label="Criar Cofrinho" icon="i-heroicons-archive-box" color="primary" variant="outline" />
+        </NuxtLink>
+      </div>
     </section>
   </div>
 </template>
@@ -139,6 +188,8 @@
 <script setup>
 const monthlyIncome = useMonthlyIncome()
 const { expenses, total, paidTotal, pendingTotal } = useExpenses()
+const userName = useUserName()
+const { piggyBanks } = useCofrinhos()
 
 const saldoLivre = computed(() => monthlyIncome.value - total.value)
 const comprometido = computed(() => {
@@ -148,6 +199,10 @@ const comprometido = computed(() => {
 
 const recentExpenses = computed(() => {
   return expenses.value.slice(-5).reverse()
+})
+
+const recentPiggyBanks = computed(() => {
+  return piggyBanks.value.slice(0, 2)
 })
 
 const categoryExpenses = computed(() => {
@@ -169,4 +224,10 @@ const summaryData = computed(() => {
 function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 }
+
+function calculateProgress(saved, goal) {
+  if (!goal || goal === 0) return 0
+  return Math.min((saved / goal) * 100, 100)
+}
+
 </script>
