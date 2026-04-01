@@ -59,19 +59,17 @@
               <UIcon name="i-heroicons-currency-dollar" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0" />
               <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
                 <label for="monthly-income" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap leading-none">Renda Mensal</label>
-              <input
-                id="monthly-income"
-                v-model.number="monthlyIncome"
-                type="number"
-                min="0"
-                step="100"
-                placeholder="0,00"
+                <input
+                  id="monthly-income"
+                  v-model.number="monthlyIncome"
+                  type="number"
+                  min="0"
+                  step="100"
+                  placeholder="0,00"
                   class="w-24 bg-transparent border-none text-sm font-semibold text-gray-900 dark:text-white focus:outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
+                />
               </div>
             </div>
-            <UButton variant="ghost" icon="i-heroicons-bell" color="neutral" />
-            <UButton variant="ghost" icon="i-heroicons-cog-6-tooth" color="neutral" />
           </div>
         </div>
       </header>
@@ -114,7 +112,6 @@ const { loaded: expensesLoaded } = useExpenses()
 const incomeLoaded = useState('monthly-income-loaded')
 
 const dataReady = computed(() => {
-  // On server, show loading; on client, wait for localStorage reads
   if (!import.meta.client) return false
   return expensesLoaded.value && incomeLoaded.value
 })
